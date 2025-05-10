@@ -3,7 +3,7 @@ from sqlalchemy.sql import func
 from app.database.database import Base
 
 class SystemPrompt(Base):
-    __tablename__ = "system_prompts"
+    __tablename__ = "SystemPrompts"
 
     id = Column(Integer, primary_key=True, index=True)
     prompt = Column(String, unique=True)
