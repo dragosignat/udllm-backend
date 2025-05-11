@@ -7,9 +7,12 @@ from app.api.schemas import (
 )
 from app.core.llm import llm_service
 from app.core.prompt_service import PromptService
+from app.core.config import get_settings
 from typing import List
+import random
 
 router = APIRouter()
+settings = get_settings()
 
 @router.post("/prompt", response_model=LLMResponse)
 async def prompt_llm(request: PromptRequest, db: Session = Depends(get_db)):
@@ -22,6 +25,27 @@ async def prompt_llm(request: PromptRequest, db: Session = Depends(get_db)):
             f"{system_prompt.prompt}\n\n{request.prompt}",
             request.mode
         )
+        
+        # Check if we should return a second response
+        if random.random() <= settings.MULTIPLE_PROMPT_PROB:
+            # Get another random system prompt, excluding the first one
+            second_system_prompt = PromptService.get_random_prompt(db, [system_prompt.id])
+            
+            # Get second response
+            second_response, _ = llm_service.query(
+                f"{second_system_prompt.prompt}\n\n{request.prompt}",
+                request.mode
+            )
+            
+            return LLMResponse(
+                response=response,
+                mode=request.mode,
+                prompt=request.prompt,
+                articles=articles,
+                system_prompt_id=system_prompt.id,
+                second_response=second_response,
+                second_system_prompt_id=second_system_prompt.id
+            )
         
         return LLMResponse(
             response=response,

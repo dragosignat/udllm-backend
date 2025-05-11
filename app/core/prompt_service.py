@@ -5,9 +5,13 @@ import random
 
 class PromptService:
     @staticmethod
-    def get_random_prompt(db: Session) -> SystemPrompt:
+    def get_random_prompt(db: Session, other_prompt_ids: list[int] = []) -> SystemPrompt:
         # Get all prompts
-        prompts = db.query(SystemPrompt).all()
+        query = db.query(SystemPrompt)
+        if other_prompt_ids:
+            query = query.filter(SystemPrompt.id.notin_(other_prompt_ids))
+        prompts = query.all()
+        
         if not prompts:
             raise ValueError("No system prompts available")
         
