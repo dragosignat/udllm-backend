@@ -7,6 +7,7 @@ from qdrant_client import QdrantClient
 from app.core.config import get_settings
 from typing import List, Tuple
 from pydantic import BaseModel
+from detoxify import Detoxify
 
 settings = get_settings()
 
@@ -72,7 +73,23 @@ class LLMService:
         response = self.query_engine.synthesize(nodes=nodes, query_bundle=query_bundle)
         return str(response), articles
     
-    def _detoxify(self, response: str) -> str:
-        return response
+    def detoxify(self, text: str) -> str:
+        """
+        Detoxify the input text using the Detoxify library.
+
+        Args:
+            text (str): The input text to detoxify.
+
+        Returns:
+            str: The detoxified text.
+        """
+        detoxifier = Detoxify('original')
+        toxicityResult = detoxifier.predict(text)
+        if any(value > 0.5 for value in toxicityResult.values()):
+            toxicityResultString = ", ".join([f"{key} is {round(float(value), 2)}" for key, value in toxicityResult.items()])
+            response = self.llm.complete(f"Toxicity analysis detected problematic content ({toxicityResultString}). Rewrite the following text using respectful language while preserving the essential meaning: {text}")
+            return str(response)
+
+        return text
 
 llm_service = LLMService() 
