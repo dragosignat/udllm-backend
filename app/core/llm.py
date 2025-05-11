@@ -71,9 +71,12 @@ class LLMService:
             
         query_bundle = QueryBundle(query_str=system_prompt + query)
         response = self.query_engine.synthesize(nodes=nodes, query_bundle=query_bundle)
+        print("LLM response: ", response)
+        response = self._detoxify(str(response))
+        print("Detoxified response: ", response)
         return str(response), articles
     
-    def detoxify(self, text: str) -> str:
+    def _detoxify(self, text: str) -> str:
         """
         Detoxify the input text using the Detoxify library.
 
