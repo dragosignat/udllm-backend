@@ -14,6 +14,8 @@ class LLMResponse(BaseModel):
     prompt: str
     articles: List[ArticleMetadata]
     system_prompt_id: Optional[int] = None
+    second_response: Optional[str] = None
+    second_system_prompt_id: Optional[int] = None
 
 class QueryResponse(BaseModel):
     id: int
@@ -33,9 +35,8 @@ class SystemPromptCreate(SystemPromptBase):
 class SystemPromptResponse(SystemPromptBase):
     id: int
     likes: int
-    dislikes: int
     created_at: datetime
     last_used: Optional[datetime]
-
+    used: int
     class Config:
         from_attributes = True 

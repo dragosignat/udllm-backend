@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "BAAI/bge-large-en-v1.5")
     OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "mistral")
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./sql_app.db")
+    MULTIPLE_PROMPT_PROB: float = os.getenv("MULTIPLE_PROMPT_PROB", 0.3)
 
     class Config:
         env_file = ".env"
