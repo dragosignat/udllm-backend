@@ -6,13 +6,14 @@ from app.core.llm import llm_service
 from app.core.prompt_service import PromptService
 from app.core.satirical_llm import satirical_llm_service
 from app.core.config import get_settings
+from typing import Optional
 import random
 
 router = APIRouter()
 settings = get_settings()
 
-def _handle_satirical_llm(query: str):
-    response, articles = satirical_llm_service.generate_satirical_response(query)
+def _handle_satirical_llm(query: str, context: Optional[str] = None):
+    response, articles = satirical_llm_service.generate_satirical_response(query, context)
 
     return LLMResponse(
         response=response,
@@ -22,14 +23,15 @@ def _handle_satirical_llm(query: str):
         system_prompt_id=None
     )
 
-def _handle_llm(query: str, db: Session):
+def _handle_llm(query: str, context: Optional[str] = None, db: Session = Depends(get_db)):
     # Get a random system prompt
     system_prompt = PromptService.get_favorite_prompt(db)
     
     # Use the system prompt in the query
     response, articles = llm_service.query(
         query,
-        system_prompt.prompt
+        system_prompt.prompt,
+        context
     )
     
     # Check if we should return a second response
@@ -40,7 +42,8 @@ def _handle_llm(query: str, db: Session):
         # Get second response
         second_response, _ = llm_service.query(
             query,
-            second_system_prompt.prompt
+            second_system_prompt.prompt,
+            context
         )
         
         return LLMResponse(
@@ -65,8 +68,8 @@ def _handle_llm(query: str, db: Session):
 async def prompt_llm(request: PromptRequest, db: Session = Depends(get_db)):
     try:
         if request.mode == "satirical":
-            return _handle_satirical_llm(request.prompt)
+            return _handle_satirical_llm(request.prompt, request.context)
         else:
-            return _handle_llm(request.prompt, db)
+            return _handle_llm(request.prompt, request.context, db)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) 

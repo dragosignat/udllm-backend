@@ -6,6 +6,7 @@ from datetime import datetime
 class PromptRequest(BaseModel):
     prompt: str
     mode: str = "qa"  # Can be "qa" or "summarize"
+    context: Optional[str] = None
     temperature: Optional[float] = 0.7
 
 class LLMResponse(BaseModel):

@@ -5,7 +5,7 @@ from llama_index.llms.ollama import Ollama
 from llama_index.core.base.query_pipeline.query import QueryBundle
 from qdrant_client import QdrantClient
 from app.core.config import get_settings
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from pydantic import BaseModel
 from app.core.llm import ArticleMetadata
 from detoxify import Detoxify
@@ -47,7 +47,7 @@ class SatiricalLLMService:
             llm=self.llm
         )
 
-    def generate_satirical_response(self, query: str, system_prompt: str = None) -> Tuple[str, List[ArticleMetadata]]:
+    def generate_satirical_response(self, query: str, system_prompt: str = None, context: Optional[str] = None) -> Tuple[str, List[ArticleMetadata]]:
         """
         Generate a satirical response based on the user's query and relevant satirical articles.
         
@@ -89,7 +89,7 @@ class SatiricalLLMService:
                         url=metadata['url'],
                     ))
             
-        query_bundle = QueryBundle(query_str=satirical_prompt + query)
+        query_bundle = QueryBundle(query_str=satirical_prompt + query, context=context)
         response = self.query_engine.synthesize(nodes=nodes, query_bundle=query_bundle)
         response = self._detoxify(str(response))
         

@@ -5,7 +5,7 @@ from llama_index.llms.ollama import Ollama
 from llama_index.core.base.query_pipeline.query import QueryBundle
 from qdrant_client import QdrantClient
 from app.core.config import get_settings
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from pydantic import BaseModel
 from detoxify import Detoxify
 
@@ -53,7 +53,7 @@ class LLMService:
         # Initialize detoxifier
         self.detoxifier = Detoxify('original')
 
-    def query(self, query: str, system_prompt: str) -> Tuple[str, List[ArticleMetadata]]:
+    def query(self, query: str, system_prompt: str, context: Optional[str] = None) -> Tuple[str, List[ArticleMetadata]]:
 
         nodes = self.query_engine.retrieve(system_prompt + query)
         nodes = [node for node in nodes if node]
@@ -72,7 +72,7 @@ class LLMService:
                         url=metadata['url']
                     ))
             
-        query_bundle = QueryBundle(query_str=system_prompt + query)
+        query_bundle = QueryBundle(query_str=system_prompt + query, context=context)
         response = self.query_engine.synthesize(nodes=nodes, query_bundle=query_bundle)
         response = self._detoxify(str(response))
         return str(response), articles
