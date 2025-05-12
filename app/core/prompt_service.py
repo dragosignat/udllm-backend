@@ -20,6 +20,7 @@ class PromptService:
         
         # Update last_used
         prompt.last_used = datetime.now()
+        prompt.used += 1
         db.commit()
         
         return prompt
