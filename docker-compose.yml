@@ -21,26 +21,26 @@ services:
     volumes:
       - kafka_data:/bitnami/kafka
     
-    qdrant:
-      image: qdrant/qdrant
-      container_name: vectordb_dev
-      restart: unless-stopped
+  qdrant:
+    image: qdrant/qdrant
+    container_name: vectordb_dev
+    restart: unless-stopped
 
-      # REST on 6333, gRPC on 6334
-      ports:
-        - "6333:6333"
-        - "6334:6334"
+    # REST on 6333, gRPC on 6334
+    ports:
+      - "6333:6333"
+      - "6334:6334"
 
-      # Optional tweaks and secrets go here
-      #environment:
-        # example: speed up background optimizers
-        # - QDRANT__STORAGE__OPTIMIZER_THREADS=4
-        # example: set an API key (uncomment to use)
-        # - QDRANT__SERVICE__API_KEY=${QDRANT_API_KEY}
+    # Optional tweaks and secrets go here
+    #environment:
+      # example: speed up background optimizers
+      # - QDRANT__STORAGE__OPTIMIZER_THREADS=4
+      # example: set an API key (uncomment to use)
+      # - QDRANT__SERVICE__API_KEY=${QDRANT_API_KEY}
 
-      # Persist collections, snapshots and WAL files
-      volumes:
-        - qdrant_data:/qdrant/storage
+    # Persist collections, snapshots and WAL files
+    volumes:
+      - qdrant_data:/qdrant/storage
 
 
 volumes:
