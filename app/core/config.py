@@ -11,6 +11,8 @@ class Settings(BaseSettings):
     OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "mistral")
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./sql_app.db")
     MULTIPLE_PROMPT_PROB: float = os.getenv("MULTIPLE_PROMPT_PROB", 0.3)
+    KAFKA_BROKER: str = os.getenv("KAFKA_BROKER", "localhost:9092")
+    KAFKA_TOPIC: str = os.getenv("KAFKA_TOPIC", "rlhf")
 
     class Config:
         env_file = ".env"

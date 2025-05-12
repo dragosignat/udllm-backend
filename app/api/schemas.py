@@ -40,3 +40,9 @@ class SystemPromptResponse(SystemPromptBase):
     used: int
     class Config:
         from_attributes = True 
+    
+class RLHFMessage(BaseModel):
+    prompt: str
+    response: str
+    system_prompt: Optional[str] = None
+    reward: float
