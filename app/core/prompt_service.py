@@ -24,6 +24,13 @@ class PromptService:
         db.commit()
         
         return prompt
+    
+    @staticmethod
+    def get_favorite_prompt(db: Session) -> SystemPrompt:
+        prompt = db.query(SystemPrompt).order_by(SystemPrompt.likes.desc()).first()
+        if not prompt:
+            raise ValueError("No favorite prompt found")
+        return prompt
 
     @staticmethod
     def add_prompt(db: Session, prompt_text: str) -> SystemPrompt:
