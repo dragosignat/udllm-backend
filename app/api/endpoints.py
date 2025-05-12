@@ -7,6 +7,7 @@ from app.api.schemas import (
 )
 from app.core.llm import llm_service
 from app.core.prompt_service import PromptService
+from app.core.satirical_llm import SatiricalLLMService
 from app.core.config import get_settings
 from typing import List
 import random
@@ -14,16 +15,27 @@ import random
 router = APIRouter()
 settings = get_settings()
 
-@router.post("/prompt", response_model=LLMResponse)
-async def prompt_llm(request: PromptRequest, db: Session = Depends(get_db)):
-    try:
-        # Get a random system prompt
+
+def _handle_satirical_llm(query: str):
+    satirical_llm_service = SatiricalLLMService()
+    response, articles = satirical_llm_service.generate_satirical_response(query)
+
+    return LLMResponse(
+        response=response,
+        mode="satirical",
+        prompt=query,
+        articles=articles,
+        system_prompt_id=None
+    )
+
+def _handle_llm(query: str, db: Session):
+     # Get a random system prompt
         system_prompt = PromptService.get_random_prompt(db)
         
         # Use the system prompt in the query
         response, articles = llm_service.query(
-            f"{system_prompt.prompt}\n\n{request.prompt}",
-            request.mode
+            query,
+            system_prompt.prompt
         )
         
         # Check if we should return a second response
@@ -33,14 +45,14 @@ async def prompt_llm(request: PromptRequest, db: Session = Depends(get_db)):
             
             # Get second response
             second_response, _ = llm_service.query(
-                f"{second_system_prompt.prompt}\n\n{request.prompt}",
-                request.mode
+                query,
+                second_system_prompt.prompt
             )
             
             return LLMResponse(
                 response=response,
-                mode=request.mode,
-                prompt=request.prompt,
+                mode="normal",
+                prompt=query,
                 articles=articles,
                 system_prompt_id=system_prompt.id,
                 second_response=second_response,
@@ -48,12 +60,21 @@ async def prompt_llm(request: PromptRequest, db: Session = Depends(get_db)):
             )
         
         return LLMResponse(
-            response=response,
-            mode=request.mode,
-            prompt=request.prompt,
-            articles=articles,
-            system_prompt_id=system_prompt.id
+        response=response,
+        mode="normal",
+        prompt=query,
+        articles=articles,
+        system_prompt_id=system_prompt.id
         )
+
+
+@router.post("/prompt", response_model=LLMResponse)
+async def prompt_llm(request: PromptRequest, db: Session = Depends(get_db)):
+    try:
+        if request.mode == "satirical":
+            return _handle_satirical_llm(request.prompt)
+        else:
+            return _handle_llm(request.prompt, db)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -100,3 +121,4 @@ async def health_check():
         }
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"Service unhealthy: {str(e)}") 
+
