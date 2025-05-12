@@ -24,7 +24,7 @@ def _handle_satirical_llm(query: str):
 
 def _handle_llm(query: str, db: Session):
     # Get a random system prompt
-    system_prompt = PromptService.get_random_prompt(db)
+    system_prompt = PromptService.get_favorite_prompt(db)
     
     # Use the system prompt in the query
     response, articles = llm_service.query(
