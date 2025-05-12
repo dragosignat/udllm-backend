@@ -43,7 +43,7 @@ class SatiricalLLMService:
         
         # Initialize query engine
         self.query_engine = self.index.as_query_engine(
-            similarity_top_k=5,  # Reduced to get more focused results
+            similarity_top_k=3,  # Reduced to get more focused results
             llm=self.llm
         )
 

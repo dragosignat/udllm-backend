@@ -50,6 +50,9 @@ class LLMService:
             llm=self.llm
         )
 
+        # Initialize detoxifier
+        self.detoxifier = Detoxify('original')
+
     def query(self, query: str, system_prompt: str) -> Tuple[str, List[ArticleMetadata]]:
 
         nodes = self.query_engine.retrieve(system_prompt + query)
@@ -84,8 +87,7 @@ class LLMService:
         Returns:
             str: The detoxified text.
         """
-        detoxifier = Detoxify('original')
-        toxicityResult = detoxifier.predict(text)
+        toxicityResult = self.detoxifier.predict(text)
         if any(value > 0.5 for value in toxicityResult.values()):
             toxicityResultString = ", ".join([f"{key} is {round(float(value), 2)}" for key, value in toxicityResult.items()])
             response = self.llm.complete(f"Toxicity analysis detected problematic content ({toxicityResultString}). Rewrite the following text using respectful language while preserving the essential meaning: {text}")
