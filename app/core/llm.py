@@ -72,7 +72,7 @@ class LLMService:
                         url=metadata['url']
                     ))
             
-        query_bundle = QueryBundle(query_str=system_prompt + query, context=context)
+        query_bundle = QueryBundle(query_str=system_prompt + context + query)
         response = self.query_engine.synthesize(nodes=nodes, query_bundle=query_bundle)
         response = self._detoxify(str(response))
         return str(response), articles

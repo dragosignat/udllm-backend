@@ -89,7 +89,7 @@ class SatiricalLLMService:
                         url=metadata['url'],
                     ))
             
-        query_bundle = QueryBundle(query_str=satirical_prompt + query, context=context)
+        query_bundle = QueryBundle(query_str=satirical_prompt + context + query)
         response = self.query_engine.synthesize(nodes=nodes, query_bundle=query_bundle)
         response = self._detoxify(str(response))
         
