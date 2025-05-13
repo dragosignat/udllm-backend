@@ -71,6 +71,11 @@ class SatiricalLLMService:
         if system_prompt:
             satirical_prompt += system_prompt + "\n\n"
         
+        if context:
+            satirical_prompt += context + "\n\n"
+        else:
+            satirical_prompt += query + "\n\n"
+        
         # Retrieve relevant nodes
         nodes = self.query_engine.retrieve(satirical_prompt + query)
         nodes = [node for node in nodes if node]
@@ -88,10 +93,7 @@ class SatiricalLLMService:
                         title=metadata['title'],
                         url=metadata['url'],
                     ))
-        if context:
-            query_bundle = QueryBundle(query_str=satirical_prompt + context + query)
-        else:
-            query_bundle = QueryBundle(query_str=satirical_prompt + query)
+        query_bundle = QueryBundle(query_str=satirical_prompt + query)
         response = self.query_engine.synthesize(nodes=nodes, query_bundle=query_bundle)
         response = self._detoxify(str(response))
         
